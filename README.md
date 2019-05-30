@@ -1,4 +1,5 @@
-# D3 with React
+
+# Understanding D3
 
 ### Data Types and common usage
 1. Categorical ( example: movies, movie genres etc )
@@ -42,8 +43,162 @@ d3.scaleLinear()
   .range([min, max]);  // this will be output mapped from input
 ```
 
-### Helper Function
--
+
+
+### Build Bar Chart:
+
+Demo Slides : http://slides.com/shirleywu/fm-d3intro#/
+
+#### Option 1:
+Demo: https://blockbuilder.org/sxywu/a74ec5e8696fd14a8c03b353c91ae948
+In this below example we will explicitly define the DOM element ( predefined ) to be selected by d3 elements.
+```javascript
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <style>
+    body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+
+
+<body>
+  <svg>
+    <rect />
+    <rect />
+    <rect />
+    <rect />
+    <rect />
+  </svg>
+  <script>
+
+    var data = [100, 250, 175, 200, 120];
+    var rectWid = 100;
+    var height = 300;
+
+    d3.selectAll('rect')
+        .data(data) //mapping given array data to data property of selectAll
+         .attr('x', (d, i) => i * rectWid) //drawing x co-ordinate size
+      .attr('y', d => height - d) // drawing y, (height-d) becase y co-ordinate starts from top left 0,0. height-d will push the bar those many pixels and remaining pixel would be our actual height from bottom.
+      .attr('width', rectWid) // defining the size of each bar
+      .attr('height', d => d) // defining height from the given data
+      .attr('fill', 'blue') // adding color
+      .attr('stroke', '#fff') // gaps between the bars
+
+  </script>
+</body>
+```
+
+#### Option 2:
+In this below example we will make use of dynamic appending DOM element using sag functionality. Hence we don’t have to populate the HTML code to insert or remove SVG data. Here `rect` will be added on fly by d3.
+Demo: https://blockbuilder.org/sxywu/bade25f3d1b1a0bbac9bf981ad0a4437
+```javascript
+<script>
+var rectWidth = 100;
+    var height = 300;
+    var data = [100, 250, 175, 200, 120];
+
+    var svg = d3.select('svg');
+    const test = svg.selectAll('rect')
+        .data(data)
+        .enter().append('rect')
+        .attr('x', (d, i) => i * rectWidth)
+        .attr('y', d => height - d)
+        .attr('width', rectWidth)
+        .attr('height', d => d)
+        .attr('fill', 'blue')
+        .attr('stroke', '#fff');
+    console.log(test); // test logger
+</script>
+```
+Console log prints all 5 rect elements one for each data set. If we console log test before `.data(data)` then we will see no `rect` element is found however as soon as we do `.enter().append(‘rect’)` it starts adding rect for each defined data set.
+- data( ).enter( ).append( ) helps in adding data on fly dynamically so it will auto populate
+
+#### Customizing Option 3:
+If we only want to select particular data element and perhaps change color of the bar then we can do like below mentioned example. Example: If the data is more than 250 then we will convert it to red else blue. Remember by default it will be black.
+```javascript
+<script>
+var rectWidth = 50;
+    var height = 300;
+    var data = [100, 250, 175, 200, 120, 60, 251, 114];
+
+    var svg = d3.select('svg');
+    svg.selectAll('rect')
+        .data(data)
+        .enter().append('rect')
+        .attr('x', (d, i) => i * rectWidth)
+        .attr('y', d => height - d)
+        .attr('width', rectWidth)
+        .attr('height', d => d)
+        .attr('fill', (d) => {
+                return d >= 250 ? 'red' : 'blue'
+         })
+        .attr('stroke','#fff');
+</script>
+```
+- console.log(enter.nodes( )); // will display all the nodes in the DOM
+- console.log(enter.data( ) ); // will display all the data bound to the node i.e rect
+
+
+### Scales and Axis :
+
+* scaleLinear( ) : used to display the range from lowest to highest
+* scaleLog( ) : used when we have smaller and extremely higher data set them using scaleLog( ) we can smoothen the curve.
+
+demo: https://blockbuilder.org/sxywu/8045c7e4f4aebce27722e23eec960a6b
+
+```javascript
+<body>
+  <svg></svg>
+  <script>
+    var city = 'San Francisco';
+    var width = 900;
+    var height = 300;
+
+    // dataset of city temperatures across time
+    d3.tsv('data.tsv', (err, data) => {
+      // clean the data
+      data.forEach(d => {
+        d.date = new Date(d.date); // x
+        ++d[city]; // y
+      });
+
+      // get min/max
+      var min = d3.min(data, d => d[city]);
+      var max = d3.max(data, d => d[city]);
+      console.log(min, max);
+      // or use extent, which gives back [min, max]
+      var extent = d3.extent(data, d => d[city]);
+      console.log(extent);
+
+
+      // try different scales, change the ranges, see what happens
+      var yScale = d3.scaleLinear()
+        .domain(extent)
+        .range([height, 0]);
+
+      // try passing in tick valuess
+         var yAxis = d3.axisLeft()
+          .scale(yScale);
+
+      d3.select('svg').append('g')
+        .attr('transform', 'translate(40, 20)')
+          .call(yAxis);
+
+      //extra: customizing the y-axis value color
+      var text = d3.selectAll('text')
+                           .attr('fill', (d) => {
+                   return d === 66 ? 'red' : 'blue'
+                 })
+    });
+  </script>
+</body>
+```
 
 ### Example Snippet
 
