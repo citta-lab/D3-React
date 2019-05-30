@@ -34,17 +34,6 @@ Must provide `r` for radius and `cx` and `cy` defines the co-ordinates from the 
 3. Text
 `text-anchor` is needed which represents `start middle center`. Example: `text-anchor: horizontal text alignment`
 
-### SVG Scales
-
-Example format:
-```
-d3.scaleLinear()
-  .domain([min, max])   // this will act as input
-  .range([min, max]);  // this will be output mapped from input
-```
-
-
-
 ### Build Bar Chart:
 
 Demo Slides : http://slides.com/shirleywu/fm-d3intro#/
@@ -147,8 +136,31 @@ var rectWidth = 50;
 
 ### Scales and Axis :
 
+If the data inputs are continuous then we can make use of d3 scale api which has [continuous](https://github.com/d3/d3-scale#continuous-scales) covers different types of scale. such as scaleTime, scaleLog etc.
+
 * scaleLinear( ) : used to display the range from lowest to highest
 * scaleLog( ) : used when we have smaller and extremely higher data set them using scaleLog( ) we can smoothen the curve.
+
+Example:
+```javascript
+d3.scaleLinear()
+  .domain([min, max])   // this will act as input
+  .range([min, max]);  // this will be output mapped from input
+```
+* domain and range has to be an array values
+* passed values can be mapped easily to get desired scale. Example: if we have domain as [0,100] then we can maybe convert that to display as [0,1.0] scale by mentioning that in the range.
+* min and max can be calculated with d3.min, d3.max or using d3.extent.
+```javascript
+# option 1:
+const min = d3.min(data, (d) => d[value]);
+const max = d3.max(data, (d) => d[value]);
+
+# option 2:
+const extent = d3.extent((data), d => d[value]);
+// extent will be [min, max] array
+```
+* scaleTime only accepts valid date format, such as string or date format. Can make use of `d3-time-format` to convert it to right format before passing it to scaleTime.
+* while using scale we just have to pass in the data as it is a function. i.e `yScale = d3.scaleLinear().domain(yExtent).range(bottom, top);` then we can use yScale as `yScale(34)`.
 
 demo: https://blockbuilder.org/sxywu/8045c7e4f4aebce27722e23eec960a6b
 
@@ -199,6 +211,14 @@ demo: https://blockbuilder.org/sxywu/8045c7e4f4aebce27722e23eec960a6b
   </script>
 </body>
 ```
+
+
+
+
+
+
+
+
 
 ### Example Snippet
 
