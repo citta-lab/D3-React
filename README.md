@@ -211,7 +211,76 @@ demo: https://blockbuilder.org/sxywu/8045c7e4f4aebce27722e23eec960a6b
   </script>
 </body>
 ```
+Another example of writing scaleLinear to project temperature from a city over period of time. You can replace the
+below script with in `<script>..</script>` to see the projections. Here is the demo [link](https://blockbuilder.org/sxywu/909992222842cdbda009006e456a23b0)
+```javascript
+<script>
 
+    var city = 'New York';
+    var width = 800;
+    var height = 300;
+    var margin = {top: 20, bottom: 20, left: 20, right: 20};
+
+    // dataset of city temperatures across time
+    d3.tsv('data.tsv', (err, data) => {
+      // clean the data
+      data.forEach(d => {
+        d.date = d3.timeParse("%Y%m%d")(d.date);
+        d.date = new Date(d.date); // x axis
+        d.temp = ++d[city]; // y axis ( converting string to number by using ++ )
+      });
+
+      /**
+        Step 1: need x and y scale for axis
+
+        Description: In this step the focus is to extract min and max values
+        for each axis using extent, then use appropriate scale api's to draw
+        the data
+
+        Calculation: In d3, y axis starts with 0,0 at top and if we put
+        .range([0, margin.top]) then we would see inverted hence we need to
+        push the margin to start from down by calculating where to start.
+        (height-margin.bttom) will push it to start from the down.
+      **/
+
+      var xExtent = d3.extent(data, d => d.date);
+      var xScale = d3.scaleTime()
+      						 .domain(xExtent)
+                   .range([margin.left, width - margin.right]);
+
+      var yExtent = d3.extent(data, d => d[city]);
+      var yScale = d3.scaleLinear()
+      						 .domain(yExtent)
+                   .range([(height-margin.bottom), margin.top]);
+
+
+      /**
+        Step 2: create the rectangles by defining svg & adding things to svg.
+
+        Description: Note that we are selecting rect element which is not defined
+        in the DOM yet, however using .data() and .enter().append() we can inject
+        rect element to do the DOM based on number of available data elements
+        (i.e length)
+      */
+
+      var svg = d3.select('svg');
+
+      var rect = svg.selectAll('rect')
+      					.data(data)
+      					.enter().append('rect')
+      					.attr('width', 5)
+      					.attr('height', function(d) {
+                  // by using yScale we are removing the inverted projection
+                  return height - yScale(d[city])
+                })
+      					.attr('x', function(d) { return xScale(d.date)})
+      					.attr('y', function(d) { return yScale(d[city])})
+     						.attr('fill', 'blue')
+      					.attr('stroke', 'white')
+
+    })
+  </script>
+```
 
 
 
