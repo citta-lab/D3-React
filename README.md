@@ -1,6 +1,13 @@
 
 # Understanding D3
 
+### Pointers
+1. Live data update can be handled using `enter`, `update`, `exit` pattern in d3.  
+2. `ticks(5)` can be added while drawing `axisBotton` or `axisLeft` to limit the number of ticks `d3` generates.
+3. `tickFormat(d => d3.timeFormat('%b %Y')(d))` is equivalent to writing `tickFormat(d3.timeFormat('%b %Y'))`.
+4. y or x ticks are defined by `d3.extent` then it will scale from `[min, max]` from the data set. If we want to start from `0` scale then we can calculate min and max separately and use it in `domain ([0, yMax])`
+
+
 ### Data Types and common usage
 1. Categorical ( example: movies, movie genres etc )
 2. Ordinal ( example: t-shirt sizes )
@@ -277,6 +284,23 @@ below script with in `<script>..</script>` to see the projections. Here is the d
       					.attr('y', function(d) { return yScale(d[city])})
      						.attr('fill', 'blue')
       					.attr('stroke', 'white')
+
+        /**
+         Step 3: Define axis lines
+
+        **/
+        var xAxis = d3.axisBottom()
+                	.scale(xScale);
+        var yAxis = d3.axisLeft()
+                	.scale(yScale);
+
+        svg.append('g')
+                .attr('transform', 'translate('+[0, height-margin.bottom ]+')' )
+                .call(xAxis)
+
+        svg.append('g')
+                .attr('transform', 'translate('+[margin.left, 0]+')')
+                .call(yAxis)
 
     })
   </script>
