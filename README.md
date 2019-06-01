@@ -6,6 +6,33 @@
 2. `ticks(5)` can be added while drawing `axisBotton` or `axisLeft` to limit the number of ticks `d3` generates.
 3. `tickFormat(d => d3.timeFormat('%b %Y')(d))` is equivalent to writing `tickFormat(d3.timeFormat('%b %Y'))`.
 4. y or x ticks are defined by `d3.extent` then it will scale from `[min, max]` from the data set. If we want to start from `0` scale then we can calculate min and max separately and use it in `domain ([0, yMax])`
+5. `d3.pie()(data)` sole purpose is to calculate start and end angle.
+
+
+### HTML Skeleton
+We can refer this skeleton for using / testing d3 scripts
+```html
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <style>
+    body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <svg></svg>
+  <script>
+    //.........
+  </script>
+</body>
+</html>
+```
 
 
 ### Data Types and common usage
@@ -34,12 +61,38 @@ XML type language used for drawing shapes into the page. Most commonly, rectangl
 
 1. Rectangle
 Must provide `width` and `height` which will start the rectangle at (0,0) co-ordinates but adding `x` and `y` we define top left co-ordinates for the rectangle.
+```
+x: x-coordinate of top left
+y: y-coordinate of top left
+width
+height
+```
 
 2. Circle
 Must provide `r` for radius and `cx` and `cy` defines the co-ordinates from the center.
+```
+cx: x-coordinate of center
+cy: y-coordinate of center
+r: radius
+```
 
 3. Text
 `text-anchor` is needed which represents `start middle center`. Example: `text-anchor: horizontal text alignment`
+```
+x: x-coordinate
+y: y-coordinate
+dx: x-coordinate offset
+dy: y-coordinate offset
+text-anchor : horizontal text alignment
+```
+
+### Shapes
+Main feature of shapes is it takes care of figuring out data attribute so we don't have to. i.e d3-shapes calculates the path attribute so we don't have to.
+- d3.line()
+- d3.pie()
+
+
+
 
 ### Build Bar Chart:
 
@@ -306,8 +359,52 @@ below script with in `<script>..</script>` to see the projections. Here is the d
   </script>
 ```
 
+### Shapes
 
+#### Pie Chart
+Pie chart works by two main steps, one started with calculating the pie slices using `d3.pie()(data)` then creating the arcs using `d3.arc`.
 
+1. pie calculation ?
+Lets consider array of few numbers, then we will use `d3.pie()` on the dataset which will result in desired data set which we can use with `d3.arc()`.
+```javascript
+var data = [1,4,7];
+var pies = d3.pie()(data); // calculates the pie slices
+console.log(pies);
+```
+this will result in building data blog looks like below,
+```javascript
+// result of console.log(pies);
+[{data: 1, index: 2, value: 1, startAngle: 5.759586531581287, endAngle: 6.283185307179586, …},
+  {data: 4, index: 1, value: 4, startAngle: 3.665191429188092, endAngle: 5.759586531581287, …},
+{data: 7, index: 0, value: 7, startAngle: 0, endAngle: 3.665191429188092, …}]
+```
+
+2. Complete Pie Example
+```javascript
+var colors = d3.scaleOrdinal(d3.schemeCategory10); // responsible for color
+  var data = [1, 1, 2, 3, 5, 8, 13, 21];
+  var pies = d3.pie()(data); // calculates the pie slices
+  console.log(pies); // testing
+
+  /**
+   Building arc function which can be used as arc(data).
+   Here `attr('d', arc)` is nothing but `attr('d', (d) => arc(d))`
+  */
+  var arc = d3.arc()
+    .innerRadius(0) // 0 makes it inncer cicle stays as dot
+    .outerRadius(150) // this will be radius from inner circle
+    .startAngle(d => d.startAngle) // startAgnle is created by d3.pie()(data)
+    .endAngle(d => d.endAngle); // endAngle is also created by d3.pie()(data)
+
+  var svg = d3.select('svg')
+  	.append('g') // g for group element
+  	.attr('transform', 'translate(200,200)');
+  svg.selectAll('path')
+  	.data(pies).enter().append('path') // creating path for each data on fly
+  	.attr('d', arc) // arc here nothing by function(d){ return arc(d)}
+  	.attr('fill', (d, i) => colors(d.value))
+  	.attr('stroke', '#fff');
+```
 
 
 
