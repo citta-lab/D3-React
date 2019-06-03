@@ -7,6 +7,8 @@
 3. `tickFormat(d => d3.timeFormat('%b %Y')(d))` is equivalent to writing `tickFormat(d3.timeFormat('%b %Y'))`.
 4. y or x ticks are defined by `d3.extent` then it will scale from `[min, max]` from the data set. If we want to start from `0` scale then we can calculate min and max separately and use it in `domain ([0, yMax])`
 5. `d3.pie()(data)` sole purpose is to calculate start and end angle.
+6. Make sure to have unique identifiers (keys) while implementing update, enter and exit.
+7. Data dictates what should appear on the screen in `d3` and hence we select DOM element even if it's not there in the DOM at first.
 
 
 ### HTML Skeleton
@@ -406,6 +408,168 @@ var colors = d3.scaleOrdinal(d3.schemeCategory10); // responsible for color
   	.attr('stroke', '#fff');
 ```
 
+### Update, Enter & Exit
+
+If the we have static data which doesn't change every second then we were using `.data(data)`, but to achieve Update and Exit we need to pass second parameter to data i.e `.data(data, ....)`. So the second aspect is `key function`. Which helps in determining which data mapped to what.
+```
+data(data, key)
+```
+
+#### 1.0 Example
+If we have array of integers we could pass same integers as the key. so it would look like
+```javascript
+var data = [1,3,5,6]; // array of integers
+var bars = svg.selectAll('rect')
+    .data(data, d => d) // d => d is key function returning integers as key itself. If we would have had object then maybe d.id can be key
+bars.exit().remove(); // exit selection to remove
+/**
+ Always make sure to standardize non data dependent to minimize the DOM manipulation.
+ Hence we are setting width of the bar and default color to be white always. enter() makes
+ it for new addition rather than update ( i.e if no enter then it will be update )
+ */
+var enter = bars.enter().append('rect')
+.attr('width', rectWidth)
+.attr('stroke', '#fff')
+
+/**
+ Now remaining and newly added things to be displayed using one call i.e merge
+ merge takes care of reflecting the new changes to existing data.
+ */
+ bars = enter.merge(bars)
+ .attr('x', (d, i) => i * rectWidth)
+ .attr('y', d => height - d)
+ .attr('height', d => d )
+ .attr('fill', d => colors(d));
+```
+during this process it calculates if the existing data key's matched with the incoming dataset, if it matches with any existing `keys` then it will UPDATE the `<rect>`, if the incoming dataset has new values which is not present in existing data then it will ENTER the data to existing `<rect>`, if any existing dataset keys
+
+if it doesn't match then it triggers `exist` selection to get rid of the existing data from the `<rect>` element. Example of using update, enter and exit [here](https://blockbuilder.org/sxywu/2964ad9ee3fb5c3a9c3758af5a775516).
+
+
+### Transition
+The visualization to make it more engaging by adding time while removing and updating the elements. Below are the steps we could follow,
+
+#### Step 1: Define Transition
+```javascript
+vat t = d3.transition()
+        .duration(1000)
+```
+start with defining transition, if we don't define the duration then d3 will default to 250ms. By defining at top it will keep the synch process easy while updating.
+
+#### Step 2: Use in Exit
+```javascript
+var bars = svg.selectAll('rect')
+    .data(data, d => d)
+
+bars.exit().transition(t) // t is already defined at top
+.attr('y', height)
+.attr('height', 0) // setting height to 0
+.remove()
+```
+
+#### Step 3: Animate Remaning
+```javascript
+var enter = bars.enter().append('rect')
+.attr('width', rectWidth)
+.attr('stroke', '#fff')
+.attr('y', height); // added new attribute
+
+bars = enter.merge(bars)
+.attr('x', (d, i) => i * rectWidth)
+.attr('fill', d => colors(d))
+.transition(t) // added transition for new items
+// everything below will be transit
+.attr('y', d => height - d)
+.attr('height', d => d )
+```
+
+#### Example ( Update, Enter, Exit and Transition )
+Demo starter example [here](https://blockbuilder.org/sxywu/87352259773cd6d68b8f867241d8c638), add below script in between `<script>..</script>` to see the demo.  
+```javascript
+  // properties
+  var radius = 10;
+  var duration = 1500;
+  var width = 800;
+  var height = 600;
+  var svg = d3.select('body').append('svg');
+  // scales
+  var xScale = d3.scaleBand()
+    .rangeRound([0, width]);
+  var yScale = d3.scaleLinear()
+    .range([height, 0]);
+  var colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+
+
+
+  function update(data, year) {
+    // only using data based on selected year
+   	data = data.filter(d => d.year === year);
+
+    // define transition
+    var t = d3.transition().duration(1000);
+
+    // defining circles for selected year data on not defined circle
+    var circles = svg.selectAll('circle')
+    		.data(data, d => d.key);
+
+    // define exit before enter
+    circles.exit().transition(t)
+    		.attr('r', 0) // setting radius to 0 from 10
+    		.remove(); // remove it completely
+
+    // enter, this will create data.length number of circle
+    var enter = circles.enter().append('circle')
+    		.attr('r', radius) // constant as circle will be of same size
+    		//.attr('cy', d => yScale(d.yield) ) // add this at the end if falling from top effect is not you wanted.
+    circles = enter.merge(circles) // used for update with enter data
+    		.attr('cx', d => xScale(d.site))
+    		.transition(t) // add this once transition is defined, and exit is used
+        .attr('cy', d => yScale(d.yield))
+    		.attr('fill', d => colorScale(d.gen))
+  }
+
+
+
+  d3.csv('barleyfull.csv', function(err, response) {
+    response.forEach(function(d) {
+      // convert yield and year from string to int
+      d.year = +d.year;
+      d.yield = +d.yield;
+      // use gen and site as the unique key for each datum
+      d.key = d.site + ':' + d.gen;
+    });
+
+    console.log(response); // testing
+    var xDomain = response.map( d => d.site);
+    console.log(xDomain); // list of all x axis data
+
+    xScale.domain(xDomain);
+    console.log("xScale data : "+xScale.domain()); // the way we can test if the previous domains are set by not calling with data here.
+
+    // just reference not used in the example (option 1)
+    var yExtent = d3.extent(response, d => d.yield);
+    console.log("yMin & yMax by using extent :"+yExtent); // [min, max] data here
+
+    // manually doing yScale without using d3.extent so we can map it to 0 for min (option 2)
+    var yMax = d3.max(response, d => d.yield);
+    console.log("yMax for yScale : "+yMax); // should be same as max from d3.extent
+
+    yScale.domain([0, yMax]);
+    console.log("yScale data : "+yScale.domain());
+
+
+
+
+    var startYear = 1927;
+    var numYears = 9;
+    var index = 0;
+    // update(response, startYear); ---> using in timer
+    setInterval(() => {
+      update(response, startYear + (index % numYears));
+      index += 1;
+    }, 1000)
+  });
+```
 
 
 
