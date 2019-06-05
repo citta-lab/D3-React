@@ -9,6 +9,7 @@
 5. `d3.pie()(data)` sole purpose is to calculate start and end angle.
 6. Make sure to have unique identifiers (keys) while implementing update, enter and exit.
 7. Data dictates what should appear on the screen in `d3` and hence we select DOM element even if it's not there in the DOM at first.
+8. Great example on padding axis and bringing x-axis bottom most [here](https://blockbuilder.org/sxywu/1d5123e1d5cdaced0d8dc37f70428132). Used `.attr('transform', 'translate(' + [0, height - margin.bottom] + ')')` over `.attr('transform', 'tranlate(40, 20)')`.
 
 
 ### HTML Skeleton
