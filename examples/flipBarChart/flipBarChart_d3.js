@@ -7,22 +7,28 @@ async function getMapAyncData() {
     try {
         let response = await fetch(`https://cors-anywhere.herokuapp.com/https://www.metaweather.com/api/location/${2487956}/`);
         let data = await response.json();
-        console.log(data);
         drawD3();
     } catch (error) {
         console.log(error);
     }
 }
 
-const pathCheck = true;
+/**
+ * Fetch URL param needed to determine if we need to project
+ * chart on y axis alone. So the truthy url would be like
+ *`http://127.0.0.1:8887/index.html?bySize`
+ */
+const getUrlParam = () => {
+    const parsedUrl = new URL(window.location.href);
+    return parsedUrl.searchParams.has("bySize");
+};
 
 const drawD3 = () => {
 
-    var rectWidth = 10;
-    //    var height = 500;
+    var rectWidth = 4;
     var width = 800;
     var height = 500;
-    var data = [50, 60, 87, 445, 100, 250, 175, 200, 120, 400, 320, 50, 220, 320, 111, 260, 333, 390, 280, 350, 355, 80, 99, 245, 152];
+    var data = [50, 60, 87, 455, 100, 250, 175, 200, 120, 400, 320, 50, 220, 320, 131, 260, 333, 390, 280, 350, 355, 80, 99, 245, 152];
     var margin = {
         top: 20,
         bottom: 20,
@@ -36,6 +42,7 @@ const drawD3 = () => {
      */
 
     var svg = d3.select('svg');
+    var animate = d3.transition().duration(1000); // define animation delay time
 
     /**
      * Step 1:
@@ -46,7 +53,7 @@ const drawD3 = () => {
 
     // scale
     var yScale = d3.scaleLinear()
-        .domain([min, max])
+        .domain([0, max])
         .range([height - margin.bottom, margin.top]);
 
     var xScale = d3.scaleLinear()
@@ -60,7 +67,10 @@ const drawD3 = () => {
     var xAxis = d3.axisBottom()
         .scale(xScale);
 
-    if (!pathCheck) {
+    // check for param
+    const checkUrlParam = getUrlParam();
+
+    if (checkUrlParam) {
         xAxis
             .tickSize(0) // helps removing tick marks ( particulary first and last ticks )
             .tickValues([]); // helps removing values and ticks all together
@@ -84,30 +94,28 @@ const drawD3 = () => {
     var render = svg.selectAll('rect')
         .data(data)
         .enter().append('rect')
-        .attr('fill', 'blue') // color to fill the bar
+        .attr('fill', 'steelblue') // color to fill the bar
         .attr('stroke', '#fff'); // color between the bars
 
-    if (pathCheck) {
-        console.log(" 1. pathCheck : " + pathCheck)
+    if (checkUrlParam) {
+        render
+            .attr('x', 0)
+            .attr('y', d => yScale(d))
+            .attr('width', d => d) // width of the bar
+            .attr('transform', 'translate(' + [margin.left, 0] + ')')
+            .transition(animate) // delay the loading to have animation effect
+            .attr('height', rectWidth) // height of the bar
+            // making it fun by adding some color definition based on modulo calculation
+            .attr('fill', (d) => {
+                return (d % 10) === 0 ? '#EDA631' : 'steelblue';
+            });
+
+    } else {
         render
             .attr('x', (d, i) => xScale(d))
             .attr('y', d => (height - 20 - (d))) // -20 helped to align the bars on x axis
             .attr('width', rectWidth) // width of the bar
             .attr('height', d => d); // height of the bar
-
-
-    } else {
-        console.log(" 2. pathCheck : " + pathCheck)
-        render
-            .attr('x', 0)
-            .attr('y', d => {
-                return (height - d);
-            })
-            .attr('width', d => {
-                return d;
-            }) // width of the bar
-            .attr('transform', 'translate(' + [margin.left, 0] + ')')
-            .attr('height', rectWidth); // height of the bar
     }
 
 };
