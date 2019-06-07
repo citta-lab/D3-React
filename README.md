@@ -10,6 +10,7 @@
 6. Make sure to have unique identifiers (keys) while implementing update, enter and exit.
 7. Data dictates what should appear on the screen in `d3` and hence we select DOM element even if it's not there in the DOM at first.
 8. Great example on padding axis and bringing x-axis bottom most [here](https://blockbuilder.org/sxywu/1d5123e1d5cdaced0d8dc37f70428132). Used `.attr('transform', 'translate(' + [0, height - margin.bottom] + ')')` over `.attr('transform', 'tranlate(40, 20)')`.
+9. `.tickSize(0)` helps removing the tick marks on the axis. `.tickValues([])` helps removing the tick text on the axis.
 
 
 ### HTML Skeleton
@@ -636,6 +637,24 @@ barChartData = {
    }
  })
 }
+```
+
+### Useful Snippets
+
+1. Removing or coloring the ticks on axis
+```javascript
+var ticks = d3.selectAll("g.x.axis g.tick text"); // narrow-down it to the x-axis text
+
+// Option 1: fill in the ticks text with preferred color and if the background is white then it will not be visible
+ticks.attr("class", function (d, i) {
+    d3.select(this).attr('fill', 'white');
+    yAxis.ticks(10, ",f");
+});
+
+// Option 2: This removes the text from ticks
+ticks.attr("class", function (d, i) {
+    d3.select(this).remove();
+});
 ```
 
 
