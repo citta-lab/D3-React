@@ -657,6 +657,11 @@ ticks.attr("class", function (d, i) {
 });
 ```
 
+### Useful Demo's
+
+1. Flipping bars on axis
+If the user want to see the projected data on y axis we wanted to flip the projection on y and hide the scale in x axis. This prototype complete code is in [this](https://github.com/citta-lab/d3-react/blob/master/examples/flipBarChart/flipBarChart_d3.js) with code comments and can see the demo in [here](https://8biz7.codesandbox.io/). Make sure to pass `bySize` param in url to check the flipping. Example: `https://8biz7.codesandbox.io/?bySize` and flipped version is [here](https://8biz7.codesandbox.io/?bySize).
+
 
 
 
