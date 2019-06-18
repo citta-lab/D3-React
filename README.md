@@ -10,6 +10,7 @@ coordinates
 6. Make sure to have unique identifiers (keys) while implementing update, enter and exit.
 7. Data dictates what should appear on the screen in `d3` and hence we select DOM element even if it's not there in the DOM at first.
 8. Great example on padding axis and bringing x-axis bottom most [here](https://blockbuilder.org/sxywu/1d5123e1d5cdaced0d8dc37f70428132). Used `.attr('transform', 'translate(' + [0, height - margin.bottom] + ')')` over `.attr('transform', 'tranlate(40, 20)')`.
+<<<<<<< HEAD
 9. svg scale `(0,0)` of x and y starts from top left.
 10. In path's `M` represents move to and `L` represents line to.
 
@@ -81,6 +82,9 @@ we can move the individual elements to different coordinates than originally def
 </g>
 ```
 this moves both circle and rectangle to 200 pixel and fills the color with yellow, draws the line with black.
+=======
+9. `.tickSize(0)` helps removing the tick marks on the axis. `.tickValues([])` helps removing the tick text on the axis.
+>>>>>>> 44e917d8df7c3cb43f326778a67e833d9e5bfb58
 
 
 ### HTML Skeleton
@@ -709,6 +713,32 @@ barChartData = {
 }
 ```
 
+### Useful Snippets
+
+1. Removing or coloring the ticks on axis
+```javascript
+var ticks = d3.selectAll("g.x.axis g.tick text"); // narrow-down it to the x-axis text
+
+// Option 1: fill in the ticks text with preferred color and if the background is white then it will not be visible
+ticks.attr("class", function (d, i) {
+    d3.select(this).attr('fill', 'white');
+    yAxis.ticks(10, ",f");
+});
+
+// Option 2: This removes the text from ticks
+ticks.attr("class", function (d, i) {
+    d3.select(this).remove();
+});
+```
+
+### Useful Demo's
+
+1. Flipping bars on axis
+If the user want to see the projected data on y axis we wanted to flip the projection on y and hide the scale in x axis. This prototype complete code is in [this](https://github.com/citta-lab/d3-react/blob/master/examples/flipBarChart/flipBarChart_d3.js) with code comments and can see the demo in [here](https://8biz7.codesandbox.io/). Make sure to pass `bySize` param in url to check the flipping. Example: `https://8biz7.codesandbox.io/?bySize` and flipped version is [here](https://8biz7.codesandbox.io/?bySize).
+
+Demo: 
+
+![](https://github.com/citta-lab/d3-react/blob/master/examples/barChart/gif/flipBars.gif)
 
 
 

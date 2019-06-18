@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script src="./flipBarChart_d3.js"></script>
+  <!-- <script src="./barchart_d3.js"></script> -->
+  <style>
+    body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+  <h2>Example Flipping Bar Chart</h2>
+</head>
+
+<body>
+  <div>
+    <p> Note: Please pass in bySize as param to see the changes. Example: `http://127.0.0.1:8887/index.html?bySize` will load the data in
+      y axis and removes the tick marks (scale) on the x. </p>
+  </div>
+  <svg></svg>
+</body>
+</html>
