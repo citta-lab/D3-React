@@ -1,4 +1,4 @@
-
+coordinates
 # Understanding D3
 
 ### Pointers
@@ -10,6 +10,77 @@
 6. Make sure to have unique identifiers (keys) while implementing update, enter and exit.
 7. Data dictates what should appear on the screen in `d3` and hence we select DOM element even if it's not there in the DOM at first.
 8. Great example on padding axis and bringing x-axis bottom most [here](https://blockbuilder.org/sxywu/1d5123e1d5cdaced0d8dc37f70428132). Used `.attr('transform', 'translate(' + [0, height - margin.bottom] + ')')` over `.attr('transform', 'tranlate(40, 20)')`.
+9. svg scale `(0,0)` of x and y starts from top left.
+10. In path's `M` represents move to and `L` represents line to.
+
+
+### Understanding SVG
+Scalable Vector Graph scales smoothly when the .svg elements are expanded unlike pixel based images ( png ). There are few svg elements we would need to understand before jump into d3.
+
+#### 1. SVG
+In html page we could add `<svg>` element and then we can keep appending the svg attributes to achieve the desired output. If the dimensions is not defined then default dimensions are used i.e `300x150`. In below example, we will define svg as part of html body and the desired size.
+```html
+<!DOCTYPE html>
+<body>
+  <svg width="960" height="500">
+    .....
+  </svg>
+</body>
+</html>
+```
+
+#### 2. Shapes
+In this subsection we will look into creating circle and rectangle in svg, The below code will fit in between `<svg>...</svg>` elements.
+2.1 Circle:
+```html
+<circle cx="50" cy="50" r="40"></circle>
+<!-- cx : moves x axis from top left, cy: moves y axis down from top, r radius  -->
+```
+If we don't mention `cx` and `cy` then the circle will be defined on top left (0,0) with the defined radius.
+
+2.2 Rectangle
+```html
+<rect x="150" y="25" width="50"></rect>
+<!-- x : moves x axis from top left, y: moves y axis down from top , w wdth  -->
+```
+2.3 Line
+```html
+<line x1="200" y1="20" x2="300" y2="280"></line>
+<!-- x1 : x amount left to start the line, y1: y amount down to start the line -->
+<!-- x2 : x amount left to end the line, y2: y amount down to end the line -->
+```
+
+2.4 Path
+```html
+<path fill="none" d="M300 280 L350 200 L400 250 L450 230"></path>
+<!-- fill (none) : prevents filling between lines, d: short form for domain and which takes M (move to) and L350 200 represents the line start and end -->
+```
+path's are used to connect and build multiple lines together. fill none is used to avoid filling default black color between the path lines.
+
+2.5 Group
+group is used to extract the common properties between shapes and also `SVG` elements can only be collected together using group elements. Below are two examples on above scenario,
+```html
+<!-- Example 1 -->
+<g transform="translate(0, 200)" fill="#adf6ff" stroke="black">
+   <circle cx="50" cy="50" r="40" stroke-width="5"></circle>
+   <rect x="150" y="25" width="50" height="50"></rect>
+</g>
+
+<!-- Example 2  -->
+<g class="lines" transform="translate(50, 0)">
+  <line x1="200" y1="20" x2="300" y2="280"></line>
+  <path fill="none" d="M300 280 L350 200 L400 250 L450 230"></path>
+</g>
+```
+2.6 Transform
+we can move the individual elements to different coordinates than originally defined or/and we can apply this to whole `svg` or `g` to move. Example:
+```html
+<g transform="translate(0, 200)" fill="yellow" stroke="black">
+  <circle cx="50" cy="50" r="40" stroke-width="5"></circle>
+  <rect x="150" y="25" width="50" height="50"></rect>
+</g>
+```
+this moves both circle and rectangle to 200 pixel and fills the color with yellow, draws the line with black.
 
 
 ### HTML Skeleton
@@ -262,7 +333,7 @@ demo: https://blockbuilder.org/sxywu/8045c7e4f4aebce27722e23eec960a6b
           .scale(yScale);
 
       d3.select('svg').append('g')
-        .attr('transform', 'translate(40, 20)')
+        .attr('transform', 'translate(40, 20)') // 40 pixel across, 20 pixel down
           .call(yAxis);
 
       //extra: customizing the y-axis value color

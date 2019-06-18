@@ -17,7 +17,7 @@ const drawD3 = () => {
     var rectWidth = 10;
     //    var height = 500;
     var width = 800;
-    var height = 500;
+    var height = 600;
     var data = [100, 250, 175, 200, 120, 400, 320, 50, 220, 320, 111, 260, 333, 390, 280, 350, 355, 80, 99, 245, 152];
     var margin = {
         top: 20,
@@ -44,6 +44,7 @@ const drawD3 = () => {
     var yScale = d3.scaleLinear()
         .domain([min, max])
         .range([height - margin.bottom, margin.top]);
+        
 
     var xScale = d3.scaleLinear()
         .domain([min, max])
@@ -99,10 +100,18 @@ const drawD3 = () => {
 
     if (!pathCheck) {
         render
-            .attr('x', (d, i) => xScale(d))
+            //.attr('x', (d, i) => xScale(d))
             .attr('y', d => (height - 20 - d)) // -20 helped to align the bars on x axis 
             .attr('width', rectWidth) // width of the bar
-            .attr('height', d => d); // height of the bar 
+            .attr('height', d => d) // height of the bar 
+            
+            // .attr("class", "bar")
+            .attr("y", function (d) {
+                return d;
+            })
+            // .attr("height", y.rangeBand())
+            .attr("x", 0)
+            .attr("width", 10);
     } else {
         render
             .attr('x', d => (width - 20 - d))
