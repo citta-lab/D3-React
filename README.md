@@ -728,6 +728,95 @@ ticks.attr("class", function (d, i) {
 });
 ```
 
+2. Loading data from csv file
+```javascript
+import { csv } from 'd3';
+
+csv('data.csv').then(data => {
+  data.forEach(d => {
+    // converting string value to number using +'string_value'
+    d.money = +d.money * 1000;
+  });
+    // calling d3 function to render chart
+    render_function(data);
+});
+```
+
+3. Using scaleBand
+If we want to project data with respect to category then we should use scaleBand instead of scaleLinear.
+Example: `const data = [ {name: 'apple', count: 20}, {name: 'banana', count: 200}, {name: 'orange', count: 40}, {name: 'grapes', count: 30} ]` then we can use scaleBand
+to project the chart.
+```javascript
+const xValue = d => d.name;
+const innerWidth = width - margin.left - margin.right;
+
+const xScale = scaleBand()
+  .domain(data.map(xValue))
+  .range([0, innerWidth])
+  .padding(0.1);
+```
+
+4. Drawing vertical lines in the background
+Example of drawing background lines from bottom tick marks upto top screen and also formatting numbers using d3 `format` function. Here replacing `G` occurrence with
+`billions`. `-innerHeight` reverses the line upward from bottom x-axis.
+```javascript
+
+const innerHeight = height - margin.top - margin.bottom;
+const xAxisTickFormat = number =>
+  format('.3s')(number)
+    .replace('G', 'billions');
+
+const xAxis = axisBottom(xScale)
+  .tickFormat(xAxisTickFormat)
+  .tickSize(-innerHeight);
+```
+
+5. Remove Axis ( x & y by using domain )
+If we want to get rid of the axis from the view then we build the chart and remove the axis by using `domain`. Below is one of the example,
+```javascript
+const g = svg.append('g')
+   .attr('transform', `translate(${margin.left},${margin.top})`);
+const xAxis = axisBottom(xScale);
+const innerHeight = height - margin.top - margin.bottom;
+
+g.append('g').call(xAxis)
+   .attr('transform', `translate(0,${innerHeight})`)
+   .select('.domain').remove(); // will remove axis
+```
+
+6. Remove ticks from the axis
+If we are interested in removing `ticks` from the axis then we could do something below,
+```javascript
+// Before
+const g = svg.append('g')
+   .attr('transform', `translate(${margin.left},${margin.top})`);
+
+const yScale = scaleBand()
+     .domain(data.map(yValue))
+     .range([0, innerHeight])
+     .padding(0.1);
+
+g.append('g')
+     .call(axisLeft(yScale))
+     //below code removes the tick in y axis
+     .selectAll('.domain, .tick line')
+     .remove();
+```
+
+7. Adding text below x-axis
+```javascript
+const xAxisG = g.append('g').call(xAxis)
+  .attr('transform', `translate(0,${innerHeight})`);
+
+xAxisG.append('text') // selecting svg element text
+    .attr('class', 'axis-label') // adding class for further style
+    .attr('y', 65) // moves up
+    .attr('x', innerWidth / 2) // puts in the middle of x-axis
+    .attr('fill', 'black') // color for text
+    .text("Testing Text");  // text which will be displayed 
+```
+
+
 ### Useful Demo's
 
 1. Flipping bars on axis
